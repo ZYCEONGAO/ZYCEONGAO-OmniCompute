@@ -1,0 +1,39 @@
+[package]
+name        = "omni-shim"
+description = "Dynamic library injection & CUDA driver masquerade layer for OmniCompute"
+version.workspace     = true
+edition.workspace     = true
+authors.workspace     = true
+license.workspace     = true
+repository.workspace  = true
+
+# Output as a dynamic library that can be injected via LD_PRELOAD / DLL hooking
+[lib]
+name      = "omni_shim"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+omni-core = { path = "../omni-core" }
+
+# OS-level bindings for dynamic linking hooks
+libc      = { workspace = true }
+# Logging
+tracing   = { workspace = true }
+tracing-subscriber = { workspace = true }
+# Error handling
+anyhow    = { workspace = true }
+thiserror = { workspace = true }
+# Concurrency: lock-free state for the shim's dispatch table
+dashmap   = { workspace = true }
+parking_lot = { workspace = true }
+once_cell = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true }
+
+[features]
+default = ["runtime-log"]
+# Enable verbose shim tracing for debugging
+runtime-log = []
+# Simulate a fake NVIDIA device when no GPU is present (for testing)
+fake-device = []

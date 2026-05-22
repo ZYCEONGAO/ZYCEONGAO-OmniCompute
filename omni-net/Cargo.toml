@@ -1,0 +1,55 @@
+[package]
+name        = "omni-net"
+description = "Decentralized zero-trust P2P compute scheduling network for OmniCompute"
+version.workspace     = true
+edition.workspace     = true
+authors.workspace     = true
+license.workspace     = true
+repository.workspace  = true
+
+[lib]
+name = "omni_net"
+
+[dependencies]
+omni-core = { path = "../omni-core" }
+
+# Async runtime — essential for P2P event loop
+tokio     = { workspace = true }
+# P2P networking stack
+libp2p    = { workspace = true }
+# Serialization
+serde     = { workspace = true }
+serde_json = { workspace = true }
+bincode   = { workspace = true }
+bytes     = { workspace = true }
+# Cryptography — zero-trust security
+aes-gcm   = { workspace = true }
+blake3    = { workspace = true }
+ed25519-dalek = { workspace = true }
+rand      = { workspace = true }
+# Logging
+tracing   = { workspace = true }
+# Error handling
+anyhow    = { workspace = true }
+thiserror = { workspace = true }
+# Concurrency
+dashmap   = { workspace = true }
+parking_lot = { workspace = true }
+once_cell = { workspace = true }
+uuid      = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+[features]
+default = ["tee-simulation", "blind-splitting"]
+
+# Hardware TEE integration (requires platform-specific SDK)
+tee-amd-sev  = []  # AMD SEV-SNP confidential computing
+tee-intel-tdx = [] # Intel TDX confidential computing
+# Simulation mode for CI / machines without TEE support
+tee-simulation = []
+
+# Operator blind splitting privacy protocol
+blind-splitting = []

@@ -1,0 +1,55 @@
+[package]
+name        = "omni-core"
+description = "MLIR-based JIT compilation engine and virtual memory pager for OmniCompute"
+version.workspace     = true
+edition.workspace     = true
+authors.workspace     = true
+license.workspace     = true
+repository.workspace  = true
+
+[lib]
+name = "omni_core"
+
+[dependencies]
+# Async runtime for the JIT pipeline and pager async I/O
+tokio     = { workspace = true }
+# Serialization for IR serialization / cache
+serde     = { workspace = true }
+serde_json = { workspace = true }
+bincode   = { workspace = true }
+# Logging
+tracing   = { workspace = true }
+# Error handling
+anyhow    = { workspace = true }
+thiserror = { workspace = true }
+# Concurrency primitives
+crossbeam = { workspace = true }
+dashmap   = { workspace = true }
+parking_lot = { workspace = true }
+once_cell = { workspace = true }
+bytes     = { workspace = true }
+uuid      = { workspace = true }
+
+[dev-dependencies]
+tokio    = { workspace = true }
+tracing-subscriber = { workspace = true }
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name    = "jit_latency"
+harness = false
+
+[features]
+default = ["codegen-amdgpu", "codegen-metal", "codegen-spirv", "pager"]
+
+# Code generation backends — can be compiled selectively
+codegen-amdgpu = []   # AMD ROCm / AMDGCN assembly emission
+codegen-metal  = []   # Apple Metal Shading Language emission
+codegen-spirv  = []   # Vulkan/Intel SPIR-V emission
+
+# Virtual memory pager for OOM-prevention
+pager = []
+
+# Enable LLVM/MLIR native bindings (requires local LLVM build)
+# When disabled, uses pure-Rust simulation for CI / testing
+llvm-native = []
