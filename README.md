@@ -4,6 +4,8 @@
 
 > A zero-invasion CUDA virtualization runtime and decentralized P2P compute network, written in Rust.
 
+
+
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![Built with Rust](https://img.shields.io/badge/Built%20with-Rust-orange.svg?logo=rust)](https://www.rust-lang.org/)
 [![Powered by MLIR](https://img.shields.io/badge/Powered%20by-MLIR%2FLLVM-8A2BE2.svg)](https://mlir.llvm.org/)
@@ -12,9 +14,19 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/ZYCEONGAO/ZYCEONGAO-OmniCompute)
 
+
 ---
 
 ## Why OmniCompute?
+
+
+ZYCEONGAO-OmniCompute
+Heterogeneous (CPU/GPU/NPU) cross-architecture runtime virtualization and decentralized compute networking.
+
+Shattering the silicon monopolies, liquefying global compute, and unleashing the next generation of AI.
+
+A zero-overhead CUDA virtualization runtime and decentralized P2P compute infrastructure written in Rust. We are building the "universal outlet" and "smart power grid" for global compute, transforming processing power into a frictionless, liquid commodity just like electricity.
+
 
 Today, AI evolution is locked inside expensive, centralized data centers.
 Developers, researchers, and enterprises face an unprecedented **Compute Caste System**:
