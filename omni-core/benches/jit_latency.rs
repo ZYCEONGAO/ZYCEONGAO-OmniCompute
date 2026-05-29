@@ -4,18 +4,28 @@
 //! using the Criterion framework.
 
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
-use omni_core::{HardwareProfile, TargetBackend, JitEngine, OmniRuntime, VirtualSlidingPager};
-use std::sync::Arc;
+use omni_core::{
+    hardware::{HardwareProfile, OperatingSystem, TargetBackend},
+    jit::JitEngine,
+    memory::{allocator::DuvasAllocator, pager::VirtualSlidingPager},
+};
 use std::time::Duration;
 
 /// Creates a mock AMD hardware profile for benchmarking JIT translation paths.
 fn create_mock_amdgpu_profile() -> HardwareProfile {
     HardwareProfile {
-        target_backend: TargetBackend::AmdGpu,
+        target_backend: TargetBackend::AmdRocm {
+            gfx_arch: "gfx1100".to_string(),
+            wavefront_size: 32,
+            compute_units: 96,
+        },
         vram_bytes: 16 * 1024 * 1024 * 1024,
         l2_cache_bytes: 4 * 1024 * 1024,
-        unified_memory: false,
-        device_name: "AMD Radeon RX 7900 XTX".to_string(),
+        fp16_tflops: 123.0,
+        memory_bandwidth_gbps: 960.0,
+        atomic_support: true,
+        tensor_core_support: true,
+        os: OperatingSystem::Linux,
     }
 }
 
@@ -35,10 +45,10 @@ fn bench_jit_compilation(c: &mut Criterion) {
         b.iter_custom(|iters| {
             let mut total_duration = Duration::ZERO;
             for i in 0..iters {
-                // Clear cache to ensure we benchmark the cold compile latency path
-                engine.clear_cache();
+                // Re-instantiate engine to benchmark the cold compile latency path
+                let local_engine = JitEngine::new(&hw).unwrap();
                 let start = std::time::Instant::now();
-                let _res = engine.compile_ptx(black_box(fake_ptx), black_box(i));
+                let _res = local_engine.compile_ptx(black_box(fake_ptx), black_box(i));
                 total_duration += start.elapsed();
             }
             total_duration
@@ -58,13 +68,14 @@ fn bench_jit_compilation(c: &mut Criterion) {
 
 /// Benchmarks the virtual sliding memory page manager.
 fn bench_memory_paging(c: &mut Criterion) {
-    let runtime = OmniRuntime::init().unwrap();
-    let pager = &runtime.pager;
+    let mut allocator = omni_core::memory::allocator::DuvasAllocator::new(24 * 1024 * 1024 * 1024);
     
     // Pre-allocate virtual layer address spaces
-    let layer1 = runtime.allocator.alloc(16 * 1024 * 1024, false).unwrap();
-    let layer2 = runtime.allocator.alloc(16 * 1024 * 1024, false).unwrap();
-    let layer3 = runtime.allocator.alloc(16 * 1024 * 1024, false).unwrap();
+    let layer1 = allocator.alloc(16 * 1024 * 1024, false).unwrap();
+    let layer2 = allocator.alloc(16 * 1024 * 1024, false).unwrap();
+    let layer3 = allocator.alloc(16 * 1024 * 1024, false).unwrap();
+
+    let pager = VirtualSlidingPager::new(4096, 6 * 1024 * 1024, std::sync::Arc::new(allocator));
 
     c.bench_function("Pager Window Slide Duration", |b| {
         b.iter(|| {
